@@ -159,6 +159,10 @@ app.post("/logout", (request, response) => {
 	});
 });
 
+app.get("/api/me", requireAuth, (request, response) => {
+	return response.json({ username: request.session.username });
+});
+
 app.get("/api/assignments", requireAuth, async (request, response) => {
 	try {
 		const username = request.session.username;

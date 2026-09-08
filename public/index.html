@@ -14,11 +14,49 @@
 	</head>
 	<body>
 		<header>
-			<div class="container"><a href="/">Due Soon</a></div>
+			<div class="container" id="header-bar"><a href="/">Due Soon</a><span id="header-user"><span id="user-label" hidden></span><button id="logout-button" class="row-button" type="button" hidden>Log out</button></span></div>
 		</header>
 
 		<main class="container">
-			<div id="content-grid">
+			<section id="login-card" class="card" hidden>
+				<h2>Log in</h2>
+				<p>New accounts are created automatically on first login.</p>
+				<form id="login-form">
+					<div id="form-grid">
+						<label class="field field--wide">
+							<span>Username</span>
+							<input
+								name="username"
+								type="text"
+								maxlength="50"
+								autocomplete="username"
+								required
+							/>
+						</label>
+						<label class="field field--wide">
+							<span>Password</span>
+							<input
+								name="password"
+								type="password"
+								maxlength="200"
+								autocomplete="current-password"
+								required
+							/>
+						</label>
+					</div>
+					<div id="form-actions">
+						<button
+							class="button button--primary"
+							id="login-button"
+							type="submit"
+						>
+							Log in
+						</button>
+					</div>
+				</form>
+				<p id="login-error" hidden></p>
+			</section>
+			<div id="content-grid" hidden>
 				<section class="card">
 					<h2>Assignments</h2>
 					<p id="results-caption">Loading assignments...</p>
@@ -125,7 +163,7 @@
 
 		<footer class="container">
 			<span>Due Soon</span>
-			<span>Assignment data is held in server memory.</span>
+			<span>Assignment data is stored per user in MongoDB.</span>
 		</footer>
 	</body>
 </html>

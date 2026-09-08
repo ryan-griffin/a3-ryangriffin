@@ -7,6 +7,13 @@ const form = document.querySelector("#assignment-form");
 const formTitle = document.querySelector("#form-title");
 const saveButton = document.querySelector("#save-button");
 const cancelButton = document.querySelector("#cancel-button");
+const loginCard = document.querySelector("#login-card");
+const loginForm = document.querySelector("#login-form");
+const loginButton = document.querySelector("#login-button");
+const loginError = document.querySelector("#login-error");
+const logoutButton = document.querySelector("#logout-button");
+const userLabel = document.querySelector("#user-label");
+const contentGrid = document.querySelector("#content-grid");
 
 const entities = {
 	"&": "&amp;",
@@ -20,9 +27,30 @@ const escapeHtml = (value) =>
 
 const request = async (url, options) => {
 	const response = await fetch(url, options);
-	const data = await response.json();
-	if (!response.ok) throw new Error(data.error || "Request failed.");
+	const data = await response.json().catch(() => ({}));
+	if (!response.ok) {
+		const error = new Error(data.error || "Request failed.");
+		error.status = response.status;
+		throw error;
+	}
 	return data;
+};
+
+const showLogin = () => {
+	loginCard.hidden = false;
+	contentGrid.hidden = true;
+	logoutButton.hidden = true;
+	userLabel.hidden = true;
+};
+
+const showApp = (username) => {
+	loginCard.hidden = true;
+	loginError.hidden = true;
+	loginForm.reset();
+	contentGrid.hidden = false;
+	logoutButton.hidden = false;
+	userLabel.hidden = false;
+	userLabel.textContent = username;
 };
 
 const render = () => {
@@ -82,6 +110,10 @@ const deleteAssignment = async (id) => {
 		);
 		if (editingId === id) resetForm();
 	} catch (error) {
+		if (error.status === 401) {
+			showLogin();
+			return;
+		}
 		alert(error.message);
 	}
 };
@@ -105,11 +137,52 @@ form.addEventListener("submit", async (event) => {
 		);
 		resetForm();
 	} catch (error) {
+		if (error.status === 401) {
+			showLogin();
+			return;
+		}
 		alert(error.message);
 	} finally {
 		saveButton.disabled = false;
 		saveButton.textContent = editingId ? "Save changes" : "Add assignment";
 	}
+});
+
+loginForm.addEventListener("submit", async (event) => {
+	event.preventDefault();
+	loginError.hidden = true;
+	loginButton.disabled = true;
+	loginButton.textContent = "Logging in...";
+	try {
+		const data = await request("/login", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(Object.fromEntries(new FormData(loginForm))),
+		});
+		showApp(data.username);
+		useServerData(await request("/api/assignments"));
+	} catch (error) {
+		loginError.textContent = error.message;
+		loginError.hidden = false;
+	} finally {
+		loginButton.disabled = false;
+		loginButton.textContent = "Log in";
+	}
+});
+
+logoutButton.addEventListener("click", async () => {
+	try {
+		await request("/logout", { method: "POST" });
+	} catch (error) {
+		if (error.status !== 401) {
+			alert(error.message);
+			return;
+		}
+	}
+	resetForm();
+	assignments = [];
+	render();
+	showLogin();
 });
 
 cancelButton.addEventListener("click", resetForm);
@@ -120,10 +193,19 @@ rows.addEventListener("click", (event) => {
 	if (button.dataset.action === "delete") deleteAssignment(button.dataset.id);
 });
 
-request("/api/assignments")
-	.then(useServerData)
-	.catch(() => {
-		caption.textContent = "Unable to load assignments";
-		rows.innerHTML =
-			'<tr><td id="table-message" class="error" colspan="8">Could not reach the server. Reload to try again.</td></tr>';
-	});
+const loadSession = async () => {
+	try {
+		const me = await request("/api/me");
+		showApp(me.username);
+		useServerData(await request("/api/assignments"));
+	} catch (error) {
+		showLogin();
+		if (error.status !== 401) {
+			caption.textContent = "Unable to load assignments";
+			rows.innerHTML =
+				'<tr><td id="table-message" class="error" colspan="8">Could not reach the server. Reload to try again.</td></tr>';
+		}
+	}
+};
+
+loadSession();
