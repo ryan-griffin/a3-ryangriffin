@@ -67,11 +67,11 @@ const render = () => {
 			<td>${assignment.hours} hours</td>
 			<td>${assignment.priority}</td>
 			<td>${assignment.urgency}</td>
-			<td><button class="row-button" type="button" data-action="edit" data-id="${assignment.id}">Edit</button><button class="row-button" type="button" data-action="delete" data-id="${assignment.id}">Delete</button></td>
+			<td class="text-nowrap"><button class="btn btn-link btn-sm p-0 me-2" type="button" data-action="edit" data-id="${assignment.id}">Edit</button><button class="btn btn-link btn-sm p-0" type="button" data-action="delete" data-id="${assignment.id}">Delete</button></td>
 		</tr>`,
 				)
 				.join("")
-		: '<tr><td id="table-message" colspan="8">No assignments yet. Add one using the form.</td></tr>';
+		: '<tr><td colspan="8" class="text-center text-muted">No assignments yet. Add one using the form.</td></tr>';
 };
 
 const useServerData = ({ assignments: updatedAssignments }) => {
@@ -203,7 +203,7 @@ const loadSession = async () => {
 		if (error.status !== 401) {
 			caption.textContent = "Unable to load assignments";
 			rows.innerHTML =
-				'<tr><td id="table-message" class="error" colspan="8">Could not reach the server. Reload to try again.</td></tr>';
+				'<tr><td colspan="8" class="text-center text-danger">Could not reach the server. Reload to try again.</td></tr>';
 		}
 	}
 };
