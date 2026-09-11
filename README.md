@@ -15,4 +15,4 @@ Due Soon is a single-page coursework tracker for WPI assignments. Each logged-in
 
 ### Design/evaluation achievements
 
-- None. Lighthouse: 99 Performance, 100 Best Practices, 100 Accessibility, 100 SEO.
+- **Lighthouse:** 100 Performance, 100 Best Practices, 100 Accessibility, 100 SEO.
